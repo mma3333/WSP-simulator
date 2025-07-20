@@ -1,4 +1,3 @@
-
 <div id="ece-simulator" style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px;">
   <h2 style="font-size: 1.5em;">WSP – Educator Funding Estimator</h2>
   <p style="font-size: 1em;"><strong>Disclaimer:</strong> This simulation is provided for informational purposes only. It does not guarantee employment or funding level. Final classification is determined by the Department of Education and Early Childhood Development based on official verification.</p>
@@ -29,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const result = document.getElementById("result");
 
   education.addEventListener("change", function () {
-    resetAll();
+    resetAll(1);
     if (this.value === "ece") {
       q2.style.display = "block";
       q2.innerHTML = `
@@ -40,8 +39,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.querySelectorAll("input[name='nb-issued']").forEach(r => {
         r.addEventListener("change", function () {
+          resetAll(2);
           if (this.value === "yes") {
-            showYears(); // go directly to experience
+            showYears(false);
           } else {
             askAgeGroup();
           }
@@ -60,27 +60,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll("input[name='age-group']").forEach(r => {
       r.addEventListener("change", function () {
-        if (this.value === "0-5") {
-          result.innerHTML = `
-            <p>You may be eligible for <strong>Level 1 – Step 1 (Conditional)</strong>.</p>
-            <p>To be eligible, you must complete one of the following mandatory training programs:</p>
-            <ul>
-              <li>New Brunswick Curriculum Framework for Early Learning and Childcare, OR</li>
-              <li>Curriculum éducatif des Services de garde francophones du Nouveau-Brunswick</li>
-            </ul>
-            <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025.</p>
-          `;
-        } else {
-          showYears(); // fallback to experience logic
-        }
+        resetAll(3);
+        const isConditional = (this.value === "0-5");
+        showYears(isConditional);
       });
     });
   }
 
-  function showYears() {
+  function showYears(conditional) {
     q5.style.display = "block";
     q5.innerHTML = `
-      <label><strong>3. How many years of experience working with children do you have?</strong></label><br>
+      <label><strong>4. How many years of experience working with children do you have since your certificate or diploma was issued?</strong></label><br>
+      <p style="font-size: 0.95em; margin-top: 5px; margin-bottom: 10px;">In Level 1: When an educator completes the training required to advance from Entry Level to Level 1, they will commence at Level 1, Step 1.</p>
       <label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label><br>
       <label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label><br>
       <label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>
@@ -88,31 +79,53 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll("input[name='exp-years']").forEach(r => {
       r.addEventListener("change", function () {
+        result.innerHTML = "";
         let step = '', hourly = '', yearly = '';
         if (this.value === 'lt1') { step = 'Step 1'; hourly = '$24.00'; yearly = '$49,920'; }
         else if (this.value === '1to2') { step = 'Step 2'; hourly = '$25.00'; yearly = '$51,998'; }
         else if (this.value === 'gt2') { step = 'Step 3'; hourly = '$26.00'; yearly = '$54,080'; }
 
-        result.innerHTML = `
-          <p>You may be eligible for <strong>Level 1 – ${step}</strong>.</p>
-          <p><strong>Minimum hourly wage:</strong> ${hourly}<br>
-             <strong>Annual equivalent:</strong> ${yearly}</p>
-          <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025. Operators may choose to pay above the minimum.</p>
-        `;
+        if (conditional) {
+          result.innerHTML = `
+            <p>You may be eligible for <strong>Level 1 – Step 1 (Conditional)</strong>.</p>
+            <p><strong>Minimum hourly wage:</strong> $24.00<br>
+               <strong>Annual equivalent:</strong> $49,920</p>
+            <p>All educators conditionally approved in the WSP-ECE program will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed one of the following mandatory training requirements:</p>
+            <ul>
+              <li>90-hour Introduction to Early Childhood Education OR</li>
+              <li>30-hour Curriculum (New Brunswick Curriculum Framework for Early Learning and Childcare, OR Curriculum éducatif des Services de garde francophones du Nouveau-Brunswick)</li>
+            </ul>
+            <p>Once the mandatory training is completed, educators may be reassessed and placed at the Step that corresponds to their experience acquired since their certificate or diploma was issued.</p>
+            <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025.</p>
+          `;
+        } else {
+          result.innerHTML = `
+            <p>You may be eligible for <strong>Level 1 – ${step}</strong>.</p>
+            <p><strong>Minimum hourly wage:</strong> ${hourly}<br>
+               <strong>Annual equivalent:</strong> ${yearly}</p>
+            <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025. Operators may choose to pay above the minimum.</p>
+          `;
+        }
       });
     });
   }
 
-  function resetAll() {
-    q2.style.display = 'none';
-    q3.style.display = 'none';
-    q4.style.display = 'none';
-    q5.style.display = 'none';
-    q2.innerHTML = '';
-    q3.innerHTML = '';
-    q4.innerHTML = '';
-    q5.innerHTML = '';
-    result.innerHTML = '';
+  function resetAll(fromStep) {
+    if (fromStep <= 1) {
+      q2.style.display = 'none';
+      q2.innerHTML = '';
+    }
+    if (fromStep <= 2) {
+      q3.style.display = 'none';
+      q3.innerHTML = '';
+    }
+    if (fromStep <= 3) {
+      q5.style.display = 'none';
+      q5.innerHTML = '';
+    }
+    if (fromStep <= 4) {
+      result.innerHTML = '';
+    }
   }
 });
 </script>

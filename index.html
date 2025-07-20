@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
     q5.style.display = "block";
     q5.innerHTML = `
       <label><strong>4. How many years of experience working with children do you have since your certificate or diploma was issued?</strong></label><br>
-      <p style="font-size: 0.95em; margin-top: 5px; margin-bottom: 10px;">In Level 1: When an educator completes the training required to advance from Entry Level to Level 1, they will commence at Level 1, Step 1.</p>
+      
       <label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label><br>
       <label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label><br>
       <label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>
@@ -87,10 +87,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (conditional) {
           result.innerHTML = `
-            <p>You may be eligible for <strong>Level 1 – Step 1 (Conditional)</strong>.</p>
+            <p>$1*</p>
             <p><strong>Minimum hourly wage:</strong> $24.00<br>
                <strong>Annual equivalent:</strong> $49,920</p>
-            <p>All educators conditionally approved in the WSP-ECE program will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed one of the following mandatory training requirements:</p>
+            <p>* $1 will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed one of the following mandatory training requirements:</p>
             <ul>
               <li>90-hour Introduction to Early Childhood Education OR</li>
               <li>30-hour Curriculum (New Brunswick Curriculum Framework for Early Learning and Childcare, OR Curriculum éducatif des Services de garde francophones du Nouveau-Brunswick)</li>

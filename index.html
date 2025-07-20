@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>
     `;
 
-    document.querySelectorAll("input[name='exp-years'"] ).forEach(r => {
+    document.querySelectorAll("input[name='exp-years']").forEach(r => {
       r.addEventListener("change", function () {
         result.innerHTML = "";
         let step = '', hourly = '', yearly = '';

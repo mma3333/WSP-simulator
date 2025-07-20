@@ -14,6 +14,7 @@
 
   <div id="q2" style="margin-top: 20px; display: none;"></div>
   <div id="q3" style="margin-top: 20px; display: none;"></div>
+  <div id="q4" style="margin-top: 20px; display: none;"></div>
   <div id="q5" style="margin-top: 20px; display: none;"></div>
   <div id="result" style="margin-top: 30px; font-weight: bold;"></div>
 </div>
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const education = document.getElementById("education");
   const q2 = document.getElementById("q2");
   const q3 = document.getElementById("q3");
+  const q4 = document.getElementById("q4");
   const q5 = document.getElementById("q5");
   const result = document.getElementById("result");
 
@@ -38,73 +40,79 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.querySelectorAll("input[name='nb-issued']").forEach(r => {
         r.addEventListener("change", function () {
-          if (this.value === "yes") showIssueDate();
+          if (this.value === "yes") {
+            showYears(); // go directly to experience
+          } else {
+            askAgeGroup();
+          }
         });
       });
     }
   });
 
-  function showIssueDate() {
+  function askAgeGroup() {
     q3.style.display = "block";
     q3.innerHTML = `
-      <label><strong>3. When was it issued?</strong></label><br><br>
-      <input type="text" id="issue-year" placeholder="YYYY" maxlength="4" style="width: 100%; padding: 8px;"><br><br>
-      <select id="issue-month" style="width: 100%; padding: 8px;">
-        <option value="">-- Select Month --</option>
-        ${["January","February","March","April","May","June","July","August","September","October","November","December"].map((m,i)=>`<option value='${i+1}'>${m}</option>`).join('')}
-      </select><br><br>
-      <select id="issue-day" style="width: 100%; padding: 8px;">
-        <option value="">-- Select Day --</option>
-        ${[...Array(31)].map((_,i)=>`<option value='${i+1}'>${i+1}</option>`).join('')}
-      </select>
+      <label><strong>3. What age group of children do you want to work with?</strong></label><br>
+      <label><input type="radio" name="age-group" value="0-5"> Ages 0 to 5</label><br>
+      <label><input type="radio" name="age-group" value="6plus"> Ages 6 and above</label>
     `;
 
-    ["issue-year","issue-month","issue-day"].forEach(id => {
-      document.getElementById(id).addEventListener("change", showYears);
-      document.getElementById(id).addEventListener("input", showYears);
+    document.querySelectorAll("input[name='age-group']").forEach(r => {
+      r.addEventListener("change", function () {
+        if (this.value === "0-5") {
+          result.innerHTML = `
+            <p>You may be eligible for <strong>Level 1 – Step 1 (Conditional)</strong>.</p>
+            <p>To be eligible, you must complete one of the following mandatory training programs:</p>
+            <ul>
+              <li>New Brunswick Curriculum Framework for Early Learning and Childcare, OR</li>
+              <li>Curriculum éducatif des Services de garde francophones du Nouveau-Brunswick</li>
+            </ul>
+            <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025.</p>
+          `;
+        } else {
+          showYears(); // fallback to experience logic
+        }
+      });
     });
   }
 
   function showYears() {
-    const y = document.getElementById("issue-year").value;
-    const m = document.getElementById("issue-month").value;
-    const d = document.getElementById("issue-day").value;
-    if (y && m && d) {
-      q5.style.display = "block";
-      q5.innerHTML = `
-        <label><strong>4. How many years of experience working with children do you have?</strong></label><br>
-        <label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label><br>
-        <label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label><br>
-        <label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>
-      `;
+    q5.style.display = "block";
+    q5.innerHTML = `
+      <label><strong>3. How many years of experience working with children do you have?</strong></label><br>
+      <label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label><br>
+      <label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label><br>
+      <label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>
+    `;
 
-      document.querySelectorAll("input[name='exp-years']").forEach(r => {
-        r.addEventListener("change", function () {
-          let step = '', hourly = '', yearly = '';
-          if (this.value === 'lt1') { step = 'Step 1'; hourly = '$24.00'; yearly = '$49,920'; }
-          else if (this.value === '1to2') { step = 'Step 2'; hourly = '$25.00'; yearly = '$51,998'; }
-          else if (this.value === 'gt2') { step = 'Step 3'; hourly = '$26.00'; yearly = '$54,080'; }
+    document.querySelectorAll("input[name='exp-years']").forEach(r => {
+      r.addEventListener("change", function () {
+        let step = '', hourly = '', yearly = '';
+        if (this.value === 'lt1') { step = 'Step 1'; hourly = '$24.00'; yearly = '$49,920'; }
+        else if (this.value === '1to2') { step = 'Step 2'; hourly = '$25.00'; yearly = '$51,998'; }
+        else if (this.value === 'gt2') { step = 'Step 3'; hourly = '$26.00'; yearly = '$54,080'; }
 
-          result.innerHTML = `
-            <p>You may be eligible for <strong>Level 1 – ${step}</strong>.</p>
-            <p><strong>Minimum hourly wage:</strong> ${hourly}<br>
-               <strong>Annual equivalent:</strong> ${yearly}</p>
-            <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025. Operators may choose to pay above the minimum.</p>
-          `;
-        });
+        result.innerHTML = `
+          <p>You may be eligible for <strong>Level 1 – ${step}</strong>.</p>
+          <p><strong>Minimum hourly wage:</strong> ${hourly}<br>
+             <strong>Annual equivalent:</strong> ${yearly}</p>
+          <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025. Operators may choose to pay above the minimum.</p>
+        `;
       });
-    }
+    });
   }
 
   function resetAll() {
     q2.style.display = 'none';
     q3.style.display = 'none';
+    q4.style.display = 'none';
     q5.style.display = 'none';
     q2.innerHTML = '';
     q3.innerHTML = '';
+    q4.innerHTML = '';
     q5.innerHTML = '';
     result.innerHTML = '';
   }
 });
 </script>
-

@@ -1,155 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ECE Funding Estimator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-    }
-    h2 {
-      font-size: 1.5em;
-    }
-    select, input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      font-size: 1em;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-    }
-  </style>
-</head>
-<body>
-  <div id="ece-simulator">
-    <h2>WSP – Educator Funding Estimator</h2>
-    <p><strong>Disclaimer:</strong> This simulation is provided for informational purposes only. It does not guarantee employment or funding level. Final classification is determined by the Department of Education and Early Childhood Development based on official verification.</p>
 
-    <label><strong>1. What is your educational background?</strong></label>
-    <select id="education">
-      <option value="">-- Please select --</option>
-      <option value="ece">Canadian ECE certificate or diploma (1+ year)</option>
-      <option value="degree">Canadian college or university degree</option>
-      <option value="international">International credentials</option>
-      <option value="none">No post-secondary diploma or degree</option>
-    </select>
+<div id="ece-simulator" style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px;">
+  <h2 style="font-size: 1.5em;">WSP – Educator Funding Estimator</h2>
+  <p style="font-size: 1em;"><strong>Disclaimer:</strong> This simulation is provided for informational purposes only. It does not guarantee employment or funding level. Final classification is determined by the Department of Education and Early Childhood Development based on official verification.</p>
 
-    <div id="q2" style="margin-top: 20px; display: none;"></div>
-    <div id="q3" style="margin-top: 20px; display: none;"></div>
-    <div id="q4" style="margin-top: 20px; display: none;"></div>
-    <div id="q5" style="margin-top: 20px; display: none;"></div>
-    <div id="result" style="margin-top: 30px; font-weight: bold;"></div>
-  </div>
+  <label><strong>1. What is your educational background?</strong></label><br>
+  <select id="education" style="margin-top: 10px; padding: 10px; width: 100%; font-size: 1em;">
+    <option value="">-- Please select --</option>
+    <option value="ece">Canadian ECE certificate or diploma (1+ year)</option>
+    <option value="degree">Canadian college or university degree</option>
+    <option value="international">International credentials</option>
+    <option value="none">No post-secondary diploma or degree</option>
+  </select>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const education = document.getElementById("education");
-      const q2 = document.getElementById("q2");
-      const q3 = document.getElementById("q3");
-      const q4 = document.getElementById("q4");
-      const q5 = document.getElementById("q5");
-      const result = document.getElementById("result");
+  <div id="q2" style="margin-top: 20px; display: none;"></div>
+  <div id="q3" style="margin-top: 20px; display: none;"></div>
+  <div id="q5" style="margin-top: 20px; display: none;"></div>
+  <div id="result" style="margin-top: 30px; font-weight: bold;"></div>
+</div>
 
-      education.addEventListener("change", function () {
-        resetAll();
-        if (this.value === "ece") {
-          q2.style.display = "block";
-          q2.innerHTML =
-            '<label><strong>2. Was your certificate/diploma issued in New Brunswick?</strong></label>' +
-            '<label><input type="radio" name="nb-issued" value="yes"> Yes</label>' +
-            '<label><input type="radio" name="nb-issued" value="no"> No</label>';
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const education = document.getElementById("education");
+  const q2 = document.getElementById("q2");
+  const q3 = document.getElementById("q3");
+  const q5 = document.getElementById("q5");
+  const result = document.getElementById("result");
 
-          document.querySelectorAll("input[name='nb-issued']").forEach(function (r) {
-            r.addEventListener("change", function () {
-              if (this.value === "yes") showIssueDate();
-            });
-          });
-        }
+  education.addEventListener("change", function () {
+    resetAll();
+    if (this.value === "ece") {
+      q2.style.display = "block";
+      q2.innerHTML = `
+        <label><strong>2. Was your certificate/diploma issued in New Brunswick?</strong></label><br>
+        <label><input type="radio" name="nb-issued" value="yes"> Yes</label><br>
+        <label><input type="radio" name="nb-issued" value="no"> No</label>
+      `;
+
+      document.querySelectorAll("input[name='nb-issued']").forEach(r => {
+        r.addEventListener("change", function () {
+          if (this.value === "yes") showIssueDate();
+        });
       });
+    }
+  });
 
-      function showIssueDate() {
-        q3.style.display = "block";
-        var months = ["January", "February", "March", "April", "May", "June",
-                      "July", "August", "September", "October", "November", "December"];
-        var monthOptions = '<option value="">-- Select Month --</option>';
-        months.forEach(function (m, i) {
-          monthOptions += '<option value="' + (i + 1) + '">' + m + '</option>';
-        });
+  function showIssueDate() {
+    q3.style.display = "block";
+    q3.innerHTML = `
+      <label><strong>3. When was it issued?</strong></label><br><br>
+      <input type="text" id="issue-year" placeholder="YYYY" maxlength="4" style="width: 100%; padding: 8px;"><br><br>
+      <select id="issue-month" style="width: 100%; padding: 8px;">
+        <option value="">-- Select Month --</option>
+        ${["January","February","March","April","May","June","July","August","September","October","November","December"].map((m,i)=>`<option value='${i+1}'>${m}</option>`).join('')}
+      </select><br><br>
+      <select id="issue-day" style="width: 100%; padding: 8px;">
+        <option value="">-- Select Day --</option>
+        ${[...Array(31)].map((_,i)=>`<option value='${i+1}'>${i+1}</option>`).join('')}
+      </select>
+    `;
 
-        var dayOptions = '<option value="">-- Select Day --</option>';
-        for (var j = 1; j <= 31; j++) {
-          dayOptions += '<option value="' + j + '">' + j + '</option>';
-        }
-
-        q3.innerHTML =
-          '<label><strong>3. When was it issued?</strong></label>' +
-          '<input type="text" id="issue-year" placeholder="YYYY" maxlength="4">' +
-          '<select id="issue-month">' + monthOptions + '</select>' +
-          '<select id="issue-day">' + dayOptions + '</select>';
-
-        ["issue-year", "issue-month", "issue-day"].forEach(function (id) {
-          document.getElementById(id).addEventListener("change", showExperience);
-          document.getElementById(id).addEventListener("input", showExperience);
-        });
-      }
-
-      function showExperience() {
-        const y = document.getElementById("issue-year").value;
-        const m = document.getElementById("issue-month").value;
-        const d = document.getElementById("issue-day").value;
-        if (y && m && d) {
-          q4.style.display = "block";
-          q4.innerHTML =
-            '<label><strong>4. Do you have experience working with children?</strong></label>' +
-            '<label><input type="radio" name="child-exp" value="yes"> Yes</label>' +
-            '<label><input type="radio" name="child-exp" value="no"> No</label>';
-
-          document.querySelectorAll("input[name='child-exp']").forEach(function (r) {
-            r.addEventListener("change", function () {
-              if (this.value === "yes") showYears();
-            });
-          });
-        }
-      }
-
-      function showYears() {
-        q5.style.display = "block";
-        q5.innerHTML =
-          '<label><strong>5. How many years of experience?</strong></label>' +
-          '<label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label>' +
-          '<label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label>' +
-          '<label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>';
-
-        document.querySelectorAll("input[name='exp-years']").forEach(function (r) {
-          r.addEventListener("change", function () {
-            var step = "", hourly = "", yearly = "";
-            if (this.value === "lt1") { step = "Step 1"; hourly = "$24.00"; yearly = "$49,920"; }
-            else if (this.value === "1to2") { step = "Step 2"; hourly = "$25.00"; yearly = "$51,998"; }
-            else if (this.value === "gt2") { step = "Step 3"; hourly = "$26.00"; yearly = "$54,080"; }
-
-            result.innerHTML =
-              "<p>You may be eligible for <strong>Level 1 – " + step + "</strong>.</p>" +
-              "<p><strong>Minimum hourly wage:</strong> " + hourly + "<br>" +
-              "<strong>Annual equivalent:</strong> " + yearly + "</p>" +
-              "<p style='font-size: 0.95em;'>The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025. Operators may choose to pay above the minimum.</p>";
-          });
-        });
-      }
-
-      function resetAll() {
-        [q2, q3, q4, q5].forEach(function (q) {
-          q.style.display = "none";
-          q.innerHTML = "";
-        });
-        result.innerHTML = "";
-      }
+    ["issue-year","issue-month","issue-day"].forEach(id => {
+      document.getElementById(id).addEventListener("change", showYears);
+      document.getElementById(id).addEventListener("input", showYears);
     });
-  </script>
-</body>
-</html>
+  }
+
+  function showYears() {
+    const y = document.getElementById("issue-year").value;
+    const m = document.getElementById("issue-month").value;
+    const d = document.getElementById("issue-day").value;
+    if (y && m && d) {
+      q5.style.display = "block";
+      q5.innerHTML = `
+        <label><strong>4. How many years of experience working with children do you have?</strong></label><br>
+        <label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label><br>
+        <label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label><br>
+        <label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>
+      `;
+
+      document.querySelectorAll("input[name='exp-years']").forEach(r => {
+        r.addEventListener("change", function () {
+          let step = '', hourly = '', yearly = '';
+          if (this.value === 'lt1') { step = 'Step 1'; hourly = '$24.00'; yearly = '$49,920'; }
+          else if (this.value === '1to2') { step = 'Step 2'; hourly = '$25.00'; yearly = '$51,998'; }
+          else if (this.value === 'gt2') { step = 'Step 3'; hourly = '$26.00'; yearly = '$54,080'; }
+
+          result.innerHTML = `
+            <p>You may be eligible for <strong>Level 1 – ${step}</strong>.</p>
+            <p><strong>Minimum hourly wage:</strong> ${hourly}<br>
+               <strong>Annual equivalent:</strong> ${yearly}</p>
+            <p style="font-size: 0.95em;">The ECE Wage Grid sets out the required minimum hourly wage rate operators must pay eligible educators, effective April 1st, 2025. Operators may choose to pay above the minimum.</p>
+          `;
+        });
+      });
+    }
+  }
+
+  function resetAll() {
+    q2.style.display = 'none';
+    q3.style.display = 'none';
+    q5.style.display = 'none';
+    q2.innerHTML = '';
+    q3.innerHTML = '';
+    q5.innerHTML = '';
+    result.innerHTML = '';
+  }
+});
+</script>
+

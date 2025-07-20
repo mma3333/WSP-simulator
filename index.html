@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
         r.addEventListener("change", function () {
           resetAll(2);
           if (this.value === "yes") {
-            showYears(false);
+            askIssueDate();
           } else {
             askAgeGroup();
           }
@@ -49,6 +49,43 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   });
+
+  function askIssueDate() {
+    q3.style.display = "block";
+    q3.innerHTML = `
+      <label><strong>3. When was your certificate/diploma issued?</strong></label><br>
+      <input type="text" id="issue-year" placeholder="YYYY" maxlength="4" style="width: 100px; padding: 5px;"> 
+      <select id="issue-month" style="padding: 5px;">
+        <option value="">Month</option>
+        ${["01","02","03","04","05","06","07","08","09","10","11","12"].map(m => `<option value='${m}'>${m}</option>`).join('')}
+      </select>
+      <select id="issue-day" style="padding: 5px;">
+        <option value="">Day</option>
+        ${Array.from({ length: 31 }, (_, i) => `<option value='${i+1}'>${i+1}</option>`).join('')}
+      </select>
+    `;
+
+    ["issue-year", "issue-month", "issue-day"].forEach(id => {
+      document.getElementById(id).addEventListener("change", checkIssueDate);
+    });
+  }
+
+  function checkIssueDate() {
+    const year = parseInt(document.getElementById("issue-year").value);
+    const month = parseInt(document.getElementById("issue-month").value);
+    const day = parseInt(document.getElementById("issue-day").value);
+    if (!year || !month || !day) return;
+
+    const issueDate = new Date(year, month - 1, day);
+    const cutoff = new Date(2009, 3, 1); // April 1, 2009
+
+    resetAll(4);
+    if (issueDate < cutoff) {
+      showYears(true, true);
+    } else {
+      showYears(false);
+    }
+  }
 
   function askAgeGroup() {
     q3.style.display = "block";
@@ -67,17 +104,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function showYears(conditional) {
+  function showYears(conditional, is2009 = false) {
     q5.style.display = "block";
     q5.innerHTML = `
       <label><strong>4. How many years of experience working with children do you have since your certificate or diploma was issued?</strong></label><br>
-      
       <label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label><br>
       <label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label><br>
       <label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>
     `;
 
-    document.querySelectorAll("input[name='exp-years']").forEach(r => {
+    document.querySelectorAll("input[name='exp-years'"] ).forEach(r => {
       r.addEventListener("change", function () {
         result.innerHTML = "";
         let step = '', hourly = '', yearly = '';
@@ -85,14 +121,13 @@ document.addEventListener("DOMContentLoaded", function () {
         else if (this.value === '1to2') { step = 'Step 2'; hourly = '$25.00'; yearly = '$51,998'; }
         else if (this.value === 'gt2') { step = 'Step 3'; hourly = '$26.00'; yearly = '$54,080'; }
 
-        if (conditional) {
+        if (conditional || is2009) {
           result.innerHTML = `
             <p>You may be eligible for <strong>Level 1 – Step 1 (Conditional)</strong>.</p>
             <p><strong>Minimum hourly wage:</strong> $24.00<br>
                <strong>Annual equivalent:</strong> $49,920</p>
-            <p>All educators conditionally approved in the WSP-ECE program will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed one of the following mandatory training requirements:</p>
+            <p>All educators conditionally approved in the WSP-ECE program will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed the following mandatory training requirement:</p>
             <ul>
-              <li>90-hour Introduction to Early Childhood Education OR</li>
               <li>30-hour Curriculum (New Brunswick Curriculum Framework for Early Learning and Childcare, OR Curriculum éducatif des Services de garde francophones du Nouveau-Brunswick)</li>
             </ul>
             <p>Once the mandatory training is completed, educators may be reassessed and placed at the Step that corresponds to their experience acquired since their certificate or diploma was issued.</p>
@@ -111,21 +146,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function resetAll(fromStep) {
-    if (fromStep <= 1) {
-      q2.style.display = 'none';
-      q2.innerHTML = '';
-    }
-    if (fromStep <= 2) {
-      q3.style.display = 'none';
-      q3.innerHTML = '';
-    }
-    if (fromStep <= 3) {
-      q5.style.display = 'none';
-      q5.innerHTML = '';
-    }
-    if (fromStep <= 4) {
-      result.innerHTML = '';
-    }
+    if (fromStep <= 1) { q2.style.display = 'none'; q2.innerHTML = ''; }
+    if (fromStep <= 2) { q3.style.display = 'none'; q3.innerHTML = ''; }
+    if (fromStep <= 3) { q4.style.display = 'none'; q4.innerHTML = ''; }
+    if (fromStep <= 4) { q5.style.display = 'none'; q5.innerHTML = ''; result.innerHTML = ''; }
   }
 });
 </script>

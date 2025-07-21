@@ -46,7 +46,6 @@
     <div id="q5" style="margin-top: 20px;"></div>
     <div id="result" style="margin-top: 30px; font-weight: bold;"></div>
   </div>
-
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const education = document.getElementById("education");
@@ -118,31 +117,29 @@
         if (y && m && d) {
           const issuedDate = new Date(y, m - 1, d);
           const cutoff = new Date(2009, 3, 1); // April 1, 2009
-          if (issuedDate < cutoff) {
-            showConditionalECE("24.00", "Level 1 – Step 1 (Conditional)", true);
-          } else {
-            showExperienceQuestion("ece");
-          }
+          showExperienceQuestion("ece", issuedDate < cutoff);
         }
       }
-
       function handleECEAgeGroup(value) {
         clearBelow(q3);
         if (value === "0-5") {
           showConditionalECE("24.00", "Level 1 – Step 1 (Conditional)", true);
         } else if (value === "6plus") {
-          showExperienceQuestion("ece");
+          showExperienceQuestion("ece", false);
         }
       }
 
-      function showExperienceQuestion(path) {
+      function showExperienceQuestion(path, forceConditional) {
+        clearBelow(q3);
         q4.innerHTML =
           '<label><strong>4. How many years of experience working with children do you have since your certificate or diploma was issued?</strong></label>' +
           '<label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label>' +
           '<label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label>' +
           '<label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>';
         addRadioListener("exp-years", function (val) {
-          if (path === "ece") {
+          if (forceConditional) {
+            showConditionalECE("24.00", "Level 1 – Step 1 (Conditional)", true);
+          } else if (path === "ece") {
             let step = "", wage = "";
             if (val === "lt1") { step = "Step 1"; wage = "24.00"; }
             else if (val === "1to2") { step = "Step 2"; wage = "25.00"; }
@@ -207,3 +204,4 @@
   </script>
 </body>
 </html>
+

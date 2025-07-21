@@ -82,8 +82,12 @@
             '<label><input type="radio" name="intl-eval" value="no"> No</label>';
           addRadioListener("intl-eval", handleIntlEquivalency);
         }
-      });
 
+        if (value === "none") {
+          clearBelow(education);
+          showConditionalECE("19.20", "Entry Level – Step 1 (Conditional)", false);
+        }
+      });
       function handleECEIssuedNB(value) {
         clearBelow(q2);
         if (value === "yes") {
@@ -96,6 +100,7 @@
           addRadioListener("age-group", handleECEAgeGroup);
         }
       }
+
       function showECEIssueDate() {
         clearBelow(q2);
         const months = ["January", "February", "March", "April", "May", "June",
@@ -195,7 +200,11 @@
           '<label><input type="radio" name="intl-exp" value="1to2"> More than 1 year to less than 2 years</label>' +
           '<label><input type="radio" name="intl-exp" value="gt2"> More than 2 years</label>';
         addRadioListener("intl-exp", function () {
-          showConditionalECE("19.20", "Entry Level – Step 1 (Conditional)", false);
+          const wage = val === "bachelor" ? "24.00" : "19.20";
+          const label = val === "bachelor"
+            ? "Level 1 – Step 1 (Conditional)"
+            : "Entry Level – Step 1 (Conditional)";
+          showConditionalECE(wage, label, false);
         });
       }
       function showConditionalECE(wage, label, isECE) {

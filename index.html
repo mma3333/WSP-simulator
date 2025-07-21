@@ -59,67 +59,149 @@
       education.addEventListener("change", function () {
         resetAll();
         const value = this.value;
+
+        if (value === "ece") {
+          q2.innerHTML =
+            '<label><strong>2. Was your certificate/diploma issued in New Brunswick?</strong></label>' +
+            '<label><input type="radio" name="nb-issued" value="yes"> Yes</label>' +
+            '<label><input type="radio" name="nb-issued" value="no"> No</label>';
+          addRadioListener("nb-issued", handleECEIssuedNB);
+        }
+
         if (value === "degree") {
           q2.innerHTML =
             '<label><strong>2. What is your highest level of education?</strong></label>' +
             '<label><input type="radio" name="degree-type" value="bachelor"> Bachelor’s degree or higher</label>' +
             '<label><input type="radio" name="degree-type" value="highschool"> High school diploma/certificate</label>';
-          document.querySelectorAll("input[name='degree-type']").forEach(el => {
-            el.addEventListener("change", function () {
-              showDegreeExperience(this.value);
-            });
-          });
+          addRadioListener("degree-type", showDegreeExperience);
         }
       });
 
-      function showDegreeExperience(type) {
-        resetAfter(q2);
-        const question = '<label><strong>3. How many years of experience working with children do you have since your certificate or diploma was issued?</strong></label>';
-        const options =
-          '<label><input type="radio" name="deg-exp" value="lt1"> Less than 1 year</label>' +
-          '<label><input type="radio" name="deg-exp" value="1to2"> More than 1 year to less than 2 years</label>' +
-          '<label><input type="radio" name="deg-exp" value="gt2"> More than 2 years</label>';
-        q3.innerHTML = question + options;
+      function handleECEIssuedNB(value) {
+        clearBelow(q2);
+        if (value === "yes") {
+          showECEIssueDate();
+        } else if (value === "no") {
+          q3.innerHTML =
+            '<label><strong>3. What age group of children do you want to work with?</strong></label>' +
+            '<label><input type="radio" name="age-group" value="0-5"> 0 to 5 years old</label>' +
+            '<label><input type="radio" name="age-group" value="6plus"> 6 years and older</label>';
+          addRadioListener("age-group", handleECEAgeGroup);
+        }
+      }
 
-        document.querySelectorAll("input[name='deg-exp']").forEach(el => {
-          el.addEventListener("change", function () {
-            showDegreeResult(type);
-          });
+      function showECEIssueDate() {
+        clearBelow(q2);
+        const months = ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+        let m = '<option value="">-- Select Month --</option>';
+        months.forEach((mon, i) => { m += `<option value="${i+1}">${mon}</option>`; });
+
+        let d = '<option value="">-- Select Day --</option>';
+        for (let i = 1; i <= 31; i++) d += `<option value="${i}">${i}</option>`;
+
+        q3.innerHTML =
+          '<label><strong>3. When was your certificate issued?</strong></label>' +
+          '<input type="text" id="issue-year" maxlength="4" placeholder="YYYY" />' +
+          `<select id="issue-month">${m}</select>` +
+          `<select id="issue-day">${d}</select>`;
+
+        ["issue-year", "issue-month", "issue-day"].forEach(id => {
+          document.getElementById(id).addEventListener("change", checkECEIssueDate);
         });
       }
 
-      function showDegreeResult(type) {
-        resetAfter(q3);
-        let title = "", wage = "", note = "";
-
-        if (type === "bachelor") {
-          title = "Level 1 – Step 1 (Conditional)";
-          wage = "$24.00/hour";
-          note = "All educators conditionally approved in the WSP-ECE program will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed the following mandatory training requirement: <strong>Introduction to Early Childhood Education (90 hours)</strong>. Once the mandatory training is completed, educators may be reassessed and placed at the Step that corresponds to their experience acquired since their certificate or diploma was issued.";
-        } else if (type === "highschool") {
-          title = "Entry Level – Step 1 (Conditional)";
-          wage = "$19.20/hour";
-          note = "All educators conditionally approved in the WSP-ECE program will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed the following mandatory training requirement: <strong>Introduction to Early Childhood Education (90 hours)</strong>. Once the mandatory training is completed, educators may be reassessed and placed at the Step that corresponds to their experience acquired since their certificate or diploma was issued.";
+      function checkECEIssueDate() {
+        const y = parseInt(document.getElementById("issue-year").value);
+        const m = parseInt(document.getElementById("issue-month").value);
+        const d = parseInt(document.getElementById("issue-day").value);
+        if (y && m && d) {
+          const issuedDate = new Date(y, m - 1, d);
+          const cutoff = new Date(2009, 3, 1); // April 1, 2009
+          if (issuedDate < cutoff) {
+            showConditionalECE("24.00", "Level 1 – Step 1 (Conditional)", true);
+          } else {
+            showExperienceQuestion("ece");
+          }
         }
-
-        result.innerHTML =
-          "<p>You may be eligible for <strong>" + title + "</strong>.</p>" +
-          "<p><strong>Minimum hourly wage:</strong> " + wage + "</p>" +
-          "<p style='font-size: 0.95em;'>" + note + "</p>";
       }
 
-      function resetAfter(el) {
-        [q3, q4, q5, result].forEach(section => {
-          if (section !== el) {
-            section.innerHTML = "";
+      function handleECEAgeGroup(value) {
+        clearBelow(q3);
+        if (value === "0-5") {
+          showConditionalECE("24.00", "Level 1 – Step 1 (Conditional)", true);
+        } else if (value === "6plus") {
+          showExperienceQuestion("ece");
+        }
+      }
+
+      function showExperienceQuestion(path) {
+        q4.innerHTML =
+          '<label><strong>4. How many years of experience working with children do you have since your certificate or diploma was issued?</strong></label>' +
+          '<label><input type="radio" name="exp-years" value="lt1"> Less than 1 year</label>' +
+          '<label><input type="radio" name="exp-years" value="1to2"> More than 1 year to less than 2 years</label>' +
+          '<label><input type="radio" name="exp-years" value="gt2"> More than 2 years</label>';
+        addRadioListener("exp-years", function (val) {
+          if (path === "ece") {
+            let step = "", wage = "";
+            if (val === "lt1") { step = "Step 1"; wage = "24.00"; }
+            else if (val === "1to2") { step = "Step 2"; wage = "25.00"; }
+            else { step = "Step 3"; wage = "26.00"; }
+            showResult("Level 1 – " + step, wage);
           }
         });
       }
 
-      function resetAll() {
-        [q2, q3, q4, q5, result].forEach(el => {
-          el.innerHTML = "";
+      function showDegreeExperience(type) {
+        clearBelow(q2);
+        q3.innerHTML =
+          '<label><strong>3. How many years of experience working with children do you have since your certificate or diploma was issued?</strong></label>' +
+          '<label><input type="radio" name="deg-exp" value="lt1"> Less than 1 year</label>' +
+          '<label><input type="radio" name="deg-exp" value="1to2"> More than 1 year to less than 2 years</label>' +
+          '<label><input type="radio" name="deg-exp" value="gt2"> More than 2 years</label>';
+        addRadioListener("deg-exp", function () {
+          if (type === "bachelor") {
+            showConditionalECE("24.00", "Level 1 – Step 1 (Conditional)", false);
+          } else {
+            showConditionalECE("19.20", "Entry Level – Step 1 (Conditional)", false);
+          }
         });
+      }
+
+      function showConditionalECE(wage, label, isECE) {
+        clearBelow(q4);
+        result.innerHTML =
+          `<p>You may be eligible for <strong>${label}</strong>.</p>` +
+          `<p><strong>Minimum hourly wage:</strong> $${wage}/hour</p>` +
+          `<p style="font-size: 0.95em;">All educators conditionally approved in the WSP-ECE program will remain at Step 1 of their approved Level, regardless of their years of experience, until they have completed the following mandatory training requirement: <strong>${isECE ? "30-hour Curriculum (New Brunswick Curriculum Framework for Early Learning and Childcare, OR Curriculum éducatif des Services de garde francophones du Nouveau-Brunswick)" : "Introduction to Early Childhood Education (90 hours)"}</strong>. Once the mandatory training is completed, educators may be reassessed and placed at the Step that corresponds to their experience acquired since their certificate or diploma was issued.</p>`;
+      }
+
+      function showResult(label, wage) {
+        clearBelow(q4);
+        result.innerHTML =
+          `<p>You may be eligible for <strong>${label}</strong>.</p>` +
+          `<p><strong>Minimum hourly wage:</strong> $${wage}/hour</p>`;
+      }
+
+      function addRadioListener(name, callback) {
+        setTimeout(() => {
+          document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
+            el.addEventListener("change", () => callback(el.value));
+          });
+        }, 50);
+      }
+
+      function resetAll() {
+        [q2, q3, q4, q5, result].forEach(el => el.innerHTML = "");
+      }
+
+      function clearBelow(currentDiv) {
+        const sections = [q2, q3, q4, q5, result];
+        let clear = false;
+        for (let div of sections) {
+          if (clear) div.innerHTML = "";
+          if (div === currentDiv) clear = true;
+        }
       }
     });
   </script>
